@@ -60,6 +60,9 @@ function start_game() {
 
         self.body.bounce.set(0.5);
         self.body.collideWorldBounds = true;
+        var body_width = 20
+        var body_height = 20
+        self.body.setSize(body_width, body_height, body_width / 2, body_height / 2);
 
         self.target = null;
         self.target_pos = new Phaser.Point();
@@ -143,6 +146,15 @@ function start_game() {
             }
         }
 
+        self.custom_kill = function() {
+            self.real_kill()
+        }
+
+        self.real_kill = function() {
+            self.on_death();
+            self.destroy();
+        }
+
         self.on_death = function () {
 
         }
@@ -156,17 +168,15 @@ function start_game() {
         self.check_health = function () {
             if (!self.exists) return;
             if (self.hp <= 0) {
-                if (game.camera.target === self) {
-                    game.camera.unfollow();
-                }
+                // if (game.camera.target === self) {
+                //     game.camera.unfollow();
+                // }
                 emit_particle(self.x, self.y, 1, flash_emitter, 'explosion2');
                 if (self.faction === 'enemy') {
                     enemies_left--;
                 }
-                self.on_death();
-                self.destroy();
-
                 self.hp = 0.0;
+                self.custom_kill()
             }
         }
 
@@ -372,8 +382,14 @@ function start_game() {
             self.point_to_mouse()
         }
 
+        self.custom_kill = function() {
+            self.hp = self.max_hp
+            switch_world()
+        }
+
         self.on_death = function () {
             self.crosshair.destroy();
+            self.arm_sprite.destroy();
         }
 
         return self;
@@ -1253,6 +1269,8 @@ function start_game() {
     function preload() {
         game.load.image('tiles', 'images/tilesheet.png');
         game.load.image('platform', 'images/platform.png');
+        game.load.image('heart_fill', 'images/heart_fill.png');
+        game.load.image('heart_outline', 'images/heart_outline.png');
         game.load.image('player', 'images/player.png');
         game.load.image('player_arm', 'images/hand.png');
         game.load.image('player_arm_left', 'images/hand_left.png');
@@ -1685,18 +1703,20 @@ function start_game() {
 
         wave_text = game.add.bitmapText(game.width / 2 - 80, text_y, 'gem', '', text_size, ui_group);
 
-        var health_bar_base = ui_group.create(game.width - 120, 35, 'platform');
-        health_bar_base.anchor.setTo(0.0, 0.5);
-        health_bar_base.width = 100;
-        health_bar_base.height = 20;
-        health_bar_base.tint = 0x000000;
-
-        health_bar = ui_group.create(health_bar_base.x, health_bar_base.y, 'platform');
-        health_bar.anchor.setTo(0.0, 0.5);
-        health_bar.width = health_bar_base.width;
+        health_bar = ui_group.create(game.width - 70, 65, 'heart_fill');
+        health_bar.anchor.setTo(0.5, 1.0);
+        health_bar.width = 60;
         health_bar.total_width = health_bar.width;
-        health_bar.height = health_bar_base.height;
+        health_bar.height = 60;
+        health_bar.original_texture_width = health_bar.texture.width;
+        health_bar.original_texture_height = health_bar.texture.height;
         health_bar.tint = 0xff0000;
+
+        var health_bar_base = ui_group.create(health_bar.x, health_bar.y, 'heart_outline');
+        health_bar_base.anchor.setTo(0.5, 1.0);
+        health_bar_base.width = health_bar.width;
+        health_bar_base.height = health_bar.height;
+        health_bar_base.tint = 0x000000;
 
         var health_bar_text = game.add.bitmapText(game.width - 180, text_y, 'gem', 'HP:', text_size, ui_group);
 
@@ -1713,8 +1733,7 @@ function start_game() {
 
         for (var i = 0; i < agent_group.children.length; ++i) {
             var agent = agent_group.children[i];
-            agent.destroy();
-            agent.on_death();
+            agent.real_kill()
         }
 
         player = Player();
@@ -1755,6 +1774,7 @@ function start_game() {
     }
 
     var temp_arrow_point = {x:0, y:0};
+    var temp_heart_rect = new Phaser.Rectangle(0, 0, 100, 100)
     function ui_update() {
         if (player.weapons.length === 0) {
             current_weapon_icon_base.tint = 0x000000;
@@ -1772,7 +1792,15 @@ function start_game() {
             }
         }
 
-        health_bar.width = health_bar.total_width * player.hp / player.max_hp;
+        health_bar.crop()
+        var fill_amount = player.hp / player.max_hp;
+        var total_width = health_bar.original_texture_width
+        var total_height = health_bar.original_texture_height
+        temp_heart_rect.x = 0
+        temp_heart_rect.y = total_height * (1.0 - fill_amount)
+        temp_heart_rect.width = total_width
+        temp_heart_rect.height = total_height * fill_amount
+        health_bar.crop(temp_heart_rect)
 
         if (player.exists) {
             wave_text.text = 'Wave: ' + current_wave + ' | Enemies Left: ' + enemies_left;
@@ -1831,6 +1859,8 @@ function start_game() {
         }
         if (filter_enabled) {
             filter.update()
+            filter.uniforms.camera.value.x = game.camera.x
+            filter.uniforms.camera.value.y = -game.camera.y
         }
     }
 
@@ -1843,9 +1873,9 @@ function start_game() {
         wave_check();
         ui_update();
 
-        // if (input_manager.is_key_pressed_once(Phaser.KeyCode.T)) {
-        //     switch_world()
-        // }
+        if (input_manager.is_key_pressed_once(Phaser.KeyCode.T)) {
+            switch_world()
+        }
     }
 
 }
