@@ -54,11 +54,15 @@ Phaser.Filter.Fire = function (game) {
             "vec2 vTextureCoord = gl_FragCoord.xy / resolution.xy;",
             "vec3 color = texture2D(sampler, vec2(vTextureCoord.x, vTextureCoord.y)).xyz;",
 
-            "vec2 p = gl_FragCoord.xy * 8.0 / resolution.xx;",
-            "float q = fbm(p - time * 0.1);",
-            "vec2 r = vec2(fbm(p + q + time * speed.x - p.x - p.y), fbm(p + q - time * speed.y));",
+            "float t = floor(time * 10.) / 10.;",
+            "vec2 fireCoord = gl_FragCoord.xy;",
+            "fireCoord = floor(fireCoord / 10.) * 10.;",
+            "vec2 p = fireCoord.xy * 8.0 / resolution.xx;",
+            "float q = fbm(p - t * 0.1);",
+            "vec2 r = vec2(fbm(p + q + t * speed.x - p.x - p.y), fbm(p + q - t * speed.y));",
             "vec3 c = mix(c1, c2, fbm(p + r)) + mix(c3, c4, r.x) - mix(c5, c6, r.y);",
-            "vec3 fire = c * cos(shift * gl_FragCoord.y / resolution.y);",
+            "vec3 fire = c * cos(shift * fireCoord.y / resolution.y);",
+            "fire = floor(fire * 10.) / 10.;",
             "gl_FragColor += vec4(tint * color + fire * alpha, 1.0);",
         "}"
     ];
