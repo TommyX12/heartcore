@@ -242,6 +242,9 @@ function start_game() {
     function Player() {
         var self = Agent('player', 'player');
 
+        self.scale.x = 2.0;
+        self.scale.y = 2.0;
+
         self.crosshair_lerp = 0.5;
         self.crosshair_scale_on = 1.0;
         self.crosshair_scale_off = 2.0;
@@ -259,6 +262,8 @@ function start_game() {
         self.arm_sprite = arm_group.create(0, 0, 'player_arm');
         self.arm_sprite.anchor.x = 0.05;
         self.arm_sprite.anchor.y = 0.5;
+        self.arm_sprite.scale.x = 2.0;
+        self.arm_sprite.scale.y = 2.0;
 
         self.on_pickup_collision = function (player, pickup) {
             self.add_weapon(pickup.weapon_type, pickup.weapon_type.pickup_ammo);
@@ -306,8 +311,8 @@ function start_game() {
             }
 
             self.move(x, y);
-            self.arm_sprite.x = self.x;
-            self.arm_sprite.y = self.y - 10.0;
+            self.arm_sprite.x = self.x + 5.0;
+            self.arm_sprite.y = self.y - 5.0;
 
             self.pickup_check();
 
@@ -1121,7 +1126,7 @@ function start_game() {
         return self;
     }
 
-    var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update});
+    var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update}, false, false);
 
     var cursors;
 
@@ -1205,7 +1210,7 @@ function start_game() {
     var current_world = 'live'
 
     function preload() {
-        game.load.image('block', 'images/block.png');
+        game.load.image('tiles', 'images/tilesheet.png');
         game.load.image('platform', 'images/platform.png');
         game.load.image('player', 'images/player.png');
         game.load.image('player_arm', 'images/hand.png');
@@ -1561,7 +1566,7 @@ function start_game() {
         cursors = game.input.keyboard.createCursorKeys();
 
         tilemap = game.add.tilemap();
-        tilemap.addTilesetImage('block', null, world_tile_width, world_tile_height);
+        tilemap.addTilesetImage('tiles', null, world_tile_width, world_tile_height);
         var l = tilemap.create('tilemap', world_width, world_height, world_tile_width, world_tile_height);
         l.resizeWorld();
 
