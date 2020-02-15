@@ -1106,6 +1106,7 @@ function start_game() {
     var input_manager;
 
     var tilemap;
+    var filter;
     var layer_floor;
     var layer_wall;
     // var layer_back_decor1;
@@ -1517,6 +1518,10 @@ function start_game() {
         var l = tilemap.create('tilemap', world_width, world_height, world_tile_width, world_tile_height);
         l.resizeWorld();
 
+        filter = game.add.filter('Fire', 800, 600)
+        filter.alpha = 0.3
+        game.stage.filters = [filter]
+
         // layer_back_decor2 = create_tile_layer('layer_back_decor2', world_width, world_height, world_tile_width, world_tile_height, 2, 0x888888);
 
         // layer_back_decor1 = create_tile_layer('layer_back_decor1', world_width, world_height, world_tile_width, world_tile_height, 1.5, 0xaaaaaa);
@@ -1703,6 +1708,7 @@ function start_game() {
     }
 
     function update() {
+        filter.update()
         input_manager.update();
         agent_collision();
         update_wind();
