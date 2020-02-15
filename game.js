@@ -1191,7 +1191,7 @@ function start_game() {
     var current_world = 'live'
 
     function preload() {
-        game.load.image('block', 'images/block.png');
+        game.load.image('tiles', 'images/tilesheet.png');
         game.load.image('platform', 'images/platform.png');
         game.load.image('player', 'images/player.png');
         game.load.image('player_arm', 'images/hand.png');
@@ -1547,7 +1547,7 @@ function start_game() {
         cursors = game.input.keyboard.createCursorKeys();
 
         tilemap = game.add.tilemap();
-        tilemap.addTilesetImage('block', null, world_tile_width, world_tile_height);
+        tilemap.addTilesetImage('tiles', null, world_tile_width, world_tile_height);
         var l = tilemap.create('tilemap', world_width, world_height, world_tile_width, world_tile_height);
         l.resizeWorld();
 
