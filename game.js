@@ -255,6 +255,10 @@ function start_game() {
 
         self.launch_offset = 25.0;
 
+        self.arm_sprite = agent_group.create(0, 0, 'player_arm');
+        self.arm_sprite.anchor.x = 0.05;
+        self.arm_sprite.anchor.y = 0.5;
+
         self.on_pickup_collision = function (player, pickup) {
             self.add_weapon(pickup.weapon_type, pickup.weapon_type.pickup_ammo);
             pickup.custom_destroy();
@@ -268,7 +272,9 @@ function start_game() {
             var x = input_manager.mouse_x() - self.x
             var y = input_manager.mouse_y() - self.y
             var angle = xy_to_angle(x, y)
-            self.angle = angular_lerp(self.angle, deg(angle), self.angular_lerp, false)
+            self.angle = 0.0;
+            self.arm_sprite.angle = angular_lerp(self.arm_sprite.angle, deg(angle), self.angular_lerp, false);
+            // self.angle = angular_lerp(self.angle, deg(angle), self.angular_lerp, false)
         }
 
         self.custom_update = function () {
@@ -299,6 +305,8 @@ function start_game() {
             }
 
             self.move(x, y);
+            self.arm_sprite.x = self.x;
+            self.arm_sprite.y = self.y - 10.0;
 
             self.pickup_check();
 
@@ -1181,6 +1189,7 @@ function start_game() {
         game.load.image('block', 'images/block.png');
         game.load.image('platform', 'images/platform.png');
         game.load.image('player', 'images/player.png');
+        game.load.image('player_arm', 'images/hand.png');
         game.load.image('star', 'images/star.png');
         game.load.image('crosshair', 'images/crosshair.png');
         game.load.image('arrow', 'images/arrow.png');
