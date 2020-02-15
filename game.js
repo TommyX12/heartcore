@@ -240,10 +240,16 @@ function start_game() {
     }
 
     function Player() {
-        var self = Agent('player', 'player');
+        var self = Agent('player_left', 'player');
 
         self.scale.x = 2.0;
         self.scale.y = 2.0;
+
+        agent_group.callAll('animations.add', 'animations', 'run', [0, 1, 2, 3, 4, 5], 10, true);
+        agent_group.callAll('animations.add', 'animations', 'idle', [6], 10, true);
+
+        //  And play them
+        agent_group.callAll('animations.play', 'animations', 'idle');
 
         self.crosshair_lerp = 0.5;
         self.crosshair_scale_on = 1.0;
@@ -296,6 +302,12 @@ function start_game() {
             }
             if (input_manager.is_key_holding(Phaser.KeyCode.D)) {
                 x += 1.0;
+            }
+
+            if (x != 0 || y != 0) {
+                agent_group.callAll('animations.play', 'animations', 'run');
+            } else {
+                agent_group.callAll('animations.play', 'animations', 'idle');
             }
 
             if (input_manager.is_mouse_holding()) {
@@ -1247,6 +1259,8 @@ function start_game() {
         game.load.image('electric_shock_icon', 'images/electric_shock_icon.png');
         game.load.image('trail', 'images/trail.png');
         game.load.image('trail2', 'images/trail2.png');
+
+        game.load.spritesheet('player_left', 'images/player_left_run.png', 32, 48);
 
         game.load.bitmapFont('gem', 'fonts/gem.png', 'fonts/gem.xml');
     }
