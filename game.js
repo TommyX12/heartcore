@@ -311,8 +311,19 @@ function start_game() {
             }
 
             self.move(x, y);
-            self.arm_sprite.x = self.x + 5.0;
-            self.arm_sprite.y = self.y - 5.0;
+
+            // face right
+            if (self.target_pos.x > self.x) {
+                self.scale.x = -2.0;
+                self.arm_sprite.x = self.x - 5.0;
+                self.arm_sprite.y = self.y - 5.0;
+                self.arm_sprite.loadTexture('player_arm');
+            } else {
+                self.scale.x = 2.0;
+                self.arm_sprite.x = self.x + 5.0;
+                self.arm_sprite.y = self.y - 5.0;
+                self.arm_sprite.loadTexture('player_arm_left');
+            }
 
             self.pickup_check();
 
@@ -1214,6 +1225,7 @@ function start_game() {
         game.load.image('platform', 'images/platform.png');
         game.load.image('player', 'images/player.png');
         game.load.image('player_arm', 'images/hand.png');
+        game.load.image('player_arm_left', 'images/hand_left.png');
         game.load.image('star', 'images/star.png');
         game.load.image('crosshair', 'images/crosshair.png');
         game.load.image('arrow', 'images/arrow.png');
