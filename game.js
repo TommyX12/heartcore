@@ -261,7 +261,8 @@ function start_game() {
         //  And play them
         agent_group.callAll('animations.play', 'animations', 'idle');
 
-        self.crosshair_lerp = 0.5;
+        // self.crosshair_lerp = 0.5;
+        self.crosshair_lerp = 1.0;
         self.crosshair_scale_on = 1.0;
         self.crosshair_scale_off = 2.0;
 
@@ -1600,9 +1601,6 @@ function start_game() {
     }
 
     function create() {
-        game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
-        game.scale.startFullScreen(false);
-
         input_manager = InputManager(game);
 
         game.stage.backgroundColor = '#dddddd';
@@ -1844,6 +1842,7 @@ function start_game() {
         }
     }
 
+    var is_full_screen = false
     function update() {
         filter_update()
         input_manager.update();
@@ -1855,6 +1854,17 @@ function start_game() {
 
         if (input_manager.is_key_pressed_once(Phaser.KeyCode.T)) {
             switch_world()
+        }
+
+        if (input_manager.is_key_released_once(Phaser.KeyCode.F)) {
+            if (is_full_screen) {
+                game.scale.stopFullScreen()
+                is_full_screen = false
+            } else {
+                game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
+                game.scale.startFullScreen(false);
+                is_full_screen = true
+            }
         }
     }
 

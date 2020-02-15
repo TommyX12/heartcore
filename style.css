@@ -6,3 +6,7 @@
 #game {
 	display: inline-block;
 }
+
+.background {
+  cursor: none;
+}
