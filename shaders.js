@@ -8,6 +8,7 @@ Phaser.Filter.Fire = function (game) {
 
     this.uniforms.alpha = { type: '1f', value: 1.0 };
     this.uniforms.shift = { type: '1f', value: 1.6 };
+    this.uniforms.camera = { type: '2f', value: { x: 0, y: 0 } };
     this.uniforms.speed = { type: '2f', value: { x: 0.7, y: 0.4 } };
 
     this.fragmentSrc = [
@@ -17,6 +18,7 @@ Phaser.Filter.Fire = function (game) {
         "uniform float     time;",
         "uniform float     alpha;",
         "uniform vec2      speed;",
+        "uniform vec2      camera;",
         "uniform float     shift;",
         "uniform sampler2D sampler;",
 
@@ -55,13 +57,13 @@ Phaser.Filter.Fire = function (game) {
             "vec3 color = texture2D(sampler, vec2(vTextureCoord.x, vTextureCoord.y)).xyz;",
 
             "float t = floor(time * 10.) / 10.;",
-            "vec2 fireCoord = gl_FragCoord.xy;",
+            "vec2 fireCoord = gl_FragCoord.xy + camera.xy;",
             "fireCoord = floor(fireCoord / 10.) * 10.;",
             "vec2 p = fireCoord.xy * 8.0 / resolution.xx;",
             "float q = fbm(p - t * 0.1);",
             "vec2 r = vec2(fbm(p + q + t * speed.x - p.x - p.y), fbm(p + q - t * speed.y));",
             "vec3 c = mix(c1, c2, fbm(p + r)) + mix(c3, c4, r.x) - mix(c5, c6, r.y);",
-            "vec3 fire = c * cos(shift * fireCoord.y / resolution.y);",
+            "vec3 fire = c * cos(shift * gl_FragCoord.y / resolution.y);",
             "fire = floor(fire * 10.) / 10.;",
             "gl_FragColor += vec4(tint * color + fire * alpha, 1.0);",
         "}"
@@ -118,6 +120,18 @@ Object.defineProperty(Phaser.Filter.Fire.prototype, 'speed', {
 
     set: function(value) {
         this.uniforms.speed.value = value;
+    }
+
+});
+
+Object.defineProperty(Phaser.Filter.Fire.prototype, 'camera', {
+
+    get: function() {
+        return this.uniforms.camera.value;
+    },
+
+    set: function(value) {
+        this.uniforms.camera.value = value;
     }
 
 });

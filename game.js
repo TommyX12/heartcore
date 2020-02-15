@@ -1839,6 +1839,8 @@ function start_game() {
         }
         if (filter_enabled) {
             filter.update()
+            filter.uniforms.camera.value.x = game.camera.x
+            filter.uniforms.camera.value.y = -game.camera.y
         }
     }
 
