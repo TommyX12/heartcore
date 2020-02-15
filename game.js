@@ -227,7 +227,7 @@ function start_game() {
         self.update = function () {
             if (!self.exists) return;
             self.check_target();
-            self.rotate_to_dest();
+            // self.rotate_to_dest();
             self.check_weapons();
             self.health_update();
             self.custom_update();
@@ -264,22 +264,29 @@ function start_game() {
             game.physics.arcade.overlap(self, pickup_group, self.on_pickup_collision);
         }
 
+        self.point_to_mouse = function () {
+            var x = input_manager.mouse_x() - self.x
+            var y = input_manager.mouse_y() - self.y
+            var angle = xy_to_angle(x, y)
+            self.angle = angular_lerp(self.angle, deg(angle), self.angular_lerp, false)
+        }
+
         self.custom_update = function () {
             var x = 0, y = 0;
-            if (input_manager.is_key_holding(Phaser.KeyCode.UP)) {
+            if (input_manager.is_key_holding(Phaser.KeyCode.W)) {
                 y -= 1.0;
             }
-            if (input_manager.is_key_holding(Phaser.KeyCode.DOWN)) {
+            if (input_manager.is_key_holding(Phaser.KeyCode.S)) {
                 y += 1.0;
             }
-            if (input_manager.is_key_holding(Phaser.KeyCode.LEFT)) {
+            if (input_manager.is_key_holding(Phaser.KeyCode.A)) {
                 x -= 1.0;
             }
-            if (input_manager.is_key_holding(Phaser.KeyCode.RIGHT)) {
+            if (input_manager.is_key_holding(Phaser.KeyCode.D)) {
                 x += 1.0;
             }
 
-            if (input_manager.is_key_holding(Phaser.KeyCode.Z)) {
+            if (input_manager.is_mouse_holding()) {
                 self.fire_current_weapon();
             }
 
@@ -314,6 +321,8 @@ function start_game() {
                 self.crosshair.alpha = lerp(self.crosshair.alpha, 0.0, self.crosshair_lerp);
             }
 
+            // self.rotate_to_dest()
+            self.point_to_mouse()
         }
 
         self.on_death = function () {
@@ -401,6 +410,7 @@ function start_game() {
             // self.move(x, y);
 
             // self.weapon.launch(self.x, self.y, self.target);
+            self.rotate_to_dest()
 
             if (self.state == 'idle') {
                 if (self.target !== null) {
