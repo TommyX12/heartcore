@@ -62,6 +62,7 @@ function start_game() {
         self.body.collideWorldBounds = true;
 
         self.target = null;
+        self.target_pos = new Phaser.Point();
         self.target_range = 500;
 
         self.launch_offset = 25.0;
@@ -220,13 +221,13 @@ function start_game() {
 
         self.fire_current_weapon = function () {
             if (self.weapons.length > 0) {
-                self.weapons[self.current_weapon].launch(self.x, self.y, self.target);
+                self.weapons[self.current_weapon].launch(self.x, self.y, self.target || self.target_pos);
             }
         }
 
         self.update = function () {
             if (!self.exists) return;
-            self.check_target();
+            // self.check_target();
             // self.rotate_to_dest();
             self.check_weapons();
             self.health_update();
@@ -255,7 +256,7 @@ function start_game() {
 
         self.launch_offset = 25.0;
 
-        self.arm_sprite = agent_group.create(0, 0, 'player_arm');
+        self.arm_sprite = arm_group.create(0, 0, 'player_arm');
         self.arm_sprite.anchor.x = 0.05;
         self.arm_sprite.anchor.y = 0.5;
 
@@ -310,25 +311,35 @@ function start_game() {
 
             self.pickup_check();
 
-            if (self.target !== null) {
-                if (self.crosshair.alpha < 0.01) {
-                    self.crosshair.x = self.target.x;
-                    self.crosshair.y = self.target.y;
-                }
-                else {
-                    self.crosshair.x = lerp(self.crosshair.x, self.target.x, self.crosshair_lerp);
-                    self.crosshair.y = lerp(self.crosshair.y, self.target.y, self.crosshair_lerp);
-                }
-                self.crosshair.scale.x = lerp(self.crosshair.scale.x, 1.0, self.crosshair_lerp);
-                self.crosshair.scale.y = lerp(self.crosshair.scale.y, 1.0, self.crosshair_lerp);
-                self.crosshair.alpha = lerp(self.crosshair.alpha, 1.0, self.crosshair_lerp);
-            }
-            else {
-                self.crosshair.scale.x = lerp(self.crosshair.scale.x, 2.0, self.crosshair_lerp);
-                self.crosshair.scale.y = lerp(self.crosshair.scale.y, 2.0, self.crosshair_lerp);
-                self.crosshair.alpha = lerp(self.crosshair.alpha, 0.0, self.crosshair_lerp);
-            }
+            // if (self.target !== null) {
+            //     if (self.crosshair.alpha < 0.01) {
+            //         self.crosshair.x = self.target.x;
+            //         self.crosshair.y = self.target.y;
+            //     }
+            //     else {
+            //         self.crosshair.x = lerp(self.crosshair.x, self.target.x, self.crosshair_lerp);
+            //         self.crosshair.y = lerp(self.crosshair.y, self.target.y, self.crosshair_lerp);
+            //     }
+            //     self.crosshair.scale.x = lerp(self.crosshair.scale.x, 1.0, self.crosshair_lerp);
+            //     self.crosshair.scale.y = lerp(self.crosshair.scale.y, 1.0, self.crosshair_lerp);
+            //     self.crosshair.alpha = lerp(self.crosshair.alpha, 1.0, self.crosshair_lerp);
+            // }
+            // else {
+            //     self.crosshair.scale.x = lerp(self.crosshair.scale.x, 2.0, self.crosshair_lerp);
+            //     self.crosshair.scale.y = lerp(self.crosshair.scale.y, 2.0, self.crosshair_lerp);
+            //     self.crosshair.alpha = lerp(self.crosshair.alpha, 0.0, self.crosshair_lerp);
+            // }
 
+            self.target_pos.x = input_manager.mouse_x()
+            self.target_pos.y = input_manager.mouse_y()
+
+            self.crosshair.x = lerp(self.crosshair.x, self.target_pos.x, self.crosshair_lerp);
+            self.crosshair.y = lerp(self.crosshair.y, self.target_pos.y, self.crosshair_lerp);
+            self.crosshair.scale.x = lerp(self.crosshair.scale.x, 1.0, self.crosshair_lerp);
+            self.crosshair.scale.y = lerp(self.crosshair.scale.y, 1.0, self.crosshair_lerp);
+            self.crosshair.alpha = lerp(self.crosshair.alpha, 1.0, self.crosshair_lerp);
+
+            // self.check_target();
             // self.rotate_to_dest()
             self.point_to_mouse()
         }
@@ -418,6 +429,7 @@ function start_game() {
             // self.move(x, y);
 
             // self.weapon.launch(self.x, self.y, self.target);
+            self.check_target();
             self.rotate_to_dest()
 
             if (self.state == 'idle') {
@@ -710,7 +722,7 @@ function start_game() {
         self.target = target;
 
         self.is_valid_target = function (agent) {
-            return agent.exists && agent.faction != self.faction;
+            return agent && agent.exists && agent.faction != self.faction;
         }
 
         self.trail_size = trail_size;
@@ -736,14 +748,18 @@ function start_game() {
 
         self.on_life_end = function () {
             if (!self.exists) return;
-            if (self.is_valid_target(self.target)) {
-                emit_particle(self.x, self.y, 1, flash_emitter, 'explosion');
-                if (self.life / self.total_life < 0.05) {
-                    if (self.target.faction !== self.faction) {
-                        if (dist(self.end.x, self.end.y, self.target.x, self.target.y) < self.blast_radius) {
-                            self.target.receive_damage(self.damage);
-                        }
-                    }
+            if (self.life / self.total_life >= 0.05) return;
+
+            emit_particle(self.x, self.y, 1, flash_emitter, 'explosion');
+
+            var size = agent_group.children.length
+            for (var i = 0; i < size; ++i) {
+                var target = agent_group.children[i]
+                if (!self.is_valid_target(target)) {
+                    continue
+                }
+                if (dist(self.end.x, self.end.y, target.x, target.y) < self.blast_radius) {
+                    target.receive_damage(self.damage);
                 }
             }
             emit_particle(self.x, self.y, 3, spark_emitter, 'particle');
@@ -758,10 +774,10 @@ function start_game() {
         }
 
         self.guidance = function () {
-            if (!self.is_valid_target(self.target)) {
-                self.custom_kill();
-                return;
-            }
+            // if (!self.is_valid_target(self.target)) {
+            //     self.custom_kill();
+            //     return;
+            // }
 
             bezier_cubic(1.0 - self.life / self.total_life, self.start, self.p1, self.p2, self.end, self.pos);
 
@@ -879,7 +895,8 @@ function start_game() {
         self.missile_traile_texture = 'trail';
         self.missile_update_target = true;
         self.auto_target = false;
-        self.allow_blind_fire = false;
+        // self.allow_blind_fire = false;
+        self.allow_blind_fire = true;
         self.pellets = 1;
 
         var temp_point = new Phaser.Point(0, 0);
@@ -1046,7 +1063,8 @@ function start_game() {
         self.missile_pivot_lerp = 0.0;
         self.missile_trail_size = 15;
         self.missile_traile_texture = 'trail';
-        self.auto_target = true;
+        // self.auto_target = true;
+        self.auto_target = false;
         self.pellets = 6;
 
         return self;
@@ -1117,6 +1135,7 @@ function start_game() {
     // var layer_back_decor2;
 
     var agent_group;
+    var arm_group;
     var player;
     var player_ui_group;
 
@@ -1564,6 +1583,7 @@ function start_game() {
         path_finder.setIterationsPerCalculation(path_finder_iterations);
 
         agent_group = game.add.group();
+        arm_group = game.add.group();
 
         pickup_group = game.add.group();
         pickup_group.enableBody = true;
