@@ -380,12 +380,15 @@ function start_game() {
     }
 
     function Enemy() {
-        var self = Agent('player', 'enemy');
+        var self = Agent('imp', 'enemy');
 
         self.tint = 0xff4422;
         var pos = get_random_floor_pos(map_data, world_width, world_height, world_tile_width, world_tile_height);
         self.x = pos[0];
         self.y = pos[1];
+
+        self.scale.x = 2.0;
+        self.scale.y = 2.0;
 
         self.max_speed = 200;
         self.target_range = 400;
@@ -394,6 +397,12 @@ function start_game() {
 
         self.weapons = [AssaultRifle(self)];
         self.weapons[0].total_charge = 2.0;
+
+        self.arm_sprite = arm_group.create(0, 0, 'imp_arm');
+        self.arm_sprite.anchor.x = 0.05;
+        self.arm_sprite.anchor.y = 0.5;
+        self.arm_sprite.scale.x = 2.0;
+        self.arm_sprite.scale.y = 2.0;
 
         self.path_finding_dest_x = 0;
         self.path_finding_dest_y = 0;
@@ -405,6 +414,15 @@ function start_game() {
         self.move_towards = function (x, y) {
             if (!self.arrived_at(x, y)) {
                 self.move(x - self.x, y - self.y);
+                if (x > self.x) {
+                    self.scale.x = -2.0;
+                    self.arm_sprite.x = self.x - 5.0;
+                    self.arm_sprite.y = self.y - 5.0;
+                } else {
+                    self.scale.x = 2.0;
+                    self.arm_sprite.x = self.x + 5.0;
+                    self.arm_sprite.y = self.y - 5.0;
+                }
                 return false;
             }
             return true;
@@ -1238,6 +1256,8 @@ function start_game() {
         game.load.image('player', 'images/player.png');
         game.load.image('player_arm', 'images/hand.png');
         game.load.image('player_arm_left', 'images/hand_left.png');
+        game.load.image('imp', 'images/imp.png');
+        game.load.image('imp_arm', 'images/imp_arm.png');
         game.load.image('star', 'images/star.png');
         game.load.image('crosshair', 'images/crosshair.png');
         game.load.image('arrow', 'images/arrow.png');
