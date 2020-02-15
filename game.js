@@ -1166,10 +1166,16 @@ function start_game() {
 
     var camera_lerp = 0.05;
 
+    var filter_target_alpha = 0.0;
+    var filter_enabled = false;
+    var filter_alpha_lerp = 0.2;
+
     var wind_speed = 125;
     var wind_angle = 0;
     var wind_angle_delta = rad(36);
     var wind_d = {x: 0, y: 0};
+
+    var current_world = 'live'
 
     function preload() {
         game.load.image('block', 'images/block.png');
@@ -1458,6 +1464,24 @@ function start_game() {
         return null;
     }
 
+    function set_world(world) {
+        current_world = world
+        if (world == 'live') {
+            filter_target_alpha = 0.0
+        } else if (world == 'dead') {
+            filter.alpha = 10.0
+            filter_target_alpha = 0.3
+        }
+    }
+
+    function switch_world() {
+        if (current_world == 'live') {
+            set_world('dead')
+        } else if (current_world == 'dead') {
+            set_world('live')
+        }
+    }
+
     function get_random_floor(map_data, width, height, bound_center_x, bound_center_y, bound_radius) {
         var count = 0;
         var bound_min_x;
@@ -1514,8 +1538,8 @@ function start_game() {
         l.resizeWorld();
 
         filter = game.add.filter('Fire', 800, 600)
-        filter.alpha = 0.3
-        game.stage.filters = [filter]
+        filter.alpha = 0.0
+        filter_enabled = false
 
         // layer_back_decor2 = create_tile_layer('layer_back_decor2', world_width, world_height, world_tile_width, world_tile_height, 2, 0x888888);
 
@@ -1702,14 +1726,46 @@ function start_game() {
         }
     }
 
+    function set_filter_enabled(enabled) {
+        if (enabled == filter_enabled) {
+            return
+        }
+        filter_enabled = enabled
+        if (enabled) {
+            game.stage.filters = [filter]
+        } else {
+            game.stage.filters = null
+        }
+    }
+
+    function filter_update() {
+        if (filter.alpha < 0.01) {
+            set_filter_enabled(false)
+        } else {
+            set_filter_enabled(true)
+            filter.alpha = lerp(
+                filter.alpha,
+                filter_target_alpha,
+                filter_alpha_lerp
+            )
+        }
+        if (filter_enabled) {
+            filter.update()
+        }
+    }
+
     function update() {
-        filter.update()
+        filter_update()
         input_manager.update();
         agent_collision();
         update_wind();
         path_finder.calculate();
         wave_check();
         ui_update();
+
+        // if (input_manager.is_key_pressed_once(Phaser.KeyCode.T)) {
+        //     switch_world()
+        // }
     }
 
 }

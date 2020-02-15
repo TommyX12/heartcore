@@ -59,7 +59,7 @@ Phaser.Filter.Fire = function (game) {
             "vec2 r = vec2(fbm(p + q + time * speed.x - p.x - p.y), fbm(p + q - time * speed.y));",
             "vec3 c = mix(c1, c2, fbm(p + r)) + mix(c3, c4, r.x) - mix(c5, c6, r.y);",
             "vec3 fire = c * cos(shift * gl_FragCoord.y / resolution.y);",
-            "gl_FragColor += vec4(tint * mix(color, fire, alpha), 1.0);",
+            "gl_FragColor += vec4(tint * color + fire * alpha, 1.0);",
         "}"
     ];
 
