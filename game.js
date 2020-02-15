@@ -250,10 +250,16 @@ function start_game() {
     }
 
     function Player() {
-        var self = Agent('player', 'player');
+        var self = Agent('player_left', 'player');
 
         self.scale.x = 2.0;
         self.scale.y = 2.0;
+
+        agent_group.callAll('animations.add', 'animations', 'run', [0, 1, 2, 3, 4, 5], 10, true);
+        agent_group.callAll('animations.add', 'animations', 'idle', [6], 10, true);
+
+        //  And play them
+        agent_group.callAll('animations.play', 'animations', 'idle');
 
         self.crosshair_lerp = 0.5;
         self.crosshair_scale_on = 1.0;
@@ -308,6 +314,12 @@ function start_game() {
                 x += 1.0;
             }
 
+            if (x != 0 || y != 0) {
+                agent_group.callAll('animations.play', 'animations', 'run');
+            } else {
+                agent_group.callAll('animations.play', 'animations', 'idle');
+            }
+
             if (input_manager.is_mouse_holding()) {
                 self.fire_current_weapon();
             }
@@ -321,8 +333,19 @@ function start_game() {
             }
 
             self.move(x, y);
-            self.arm_sprite.x = self.x + 5.0;
-            self.arm_sprite.y = self.y - 5.0;
+
+            // face right
+            if (self.target_pos.x > self.x) {
+                self.scale.x = -2.0;
+                self.arm_sprite.x = self.x - 5.0;
+                self.arm_sprite.y = self.y - 5.0;
+                self.arm_sprite.loadTexture('player_arm');
+            } else {
+                self.scale.x = 2.0;
+                self.arm_sprite.x = self.x + 5.0;
+                self.arm_sprite.y = self.y - 5.0;
+                self.arm_sprite.loadTexture('player_arm_left');
+            }
 
             self.pickup_check();
 
@@ -1232,6 +1255,7 @@ function start_game() {
         game.load.image('heart_outline', 'images/heart_outline.png');
         game.load.image('player', 'images/player.png');
         game.load.image('player_arm', 'images/hand.png');
+        game.load.image('player_arm_left', 'images/hand_left.png');
         game.load.image('star', 'images/star.png');
         game.load.image('crosshair', 'images/crosshair.png');
         game.load.image('arrow', 'images/arrow.png');
@@ -1253,6 +1277,8 @@ function start_game() {
         game.load.image('electric_shock_icon', 'images/electric_shock_icon.png');
         game.load.image('trail', 'images/trail.png');
         game.load.image('trail2', 'images/trail2.png');
+
+        game.load.spritesheet('player_left', 'images/player_left_run.png', 32, 48);
 
         game.load.bitmapFont('gem', 'fonts/gem.png', 'fonts/gem.xml');
     }
