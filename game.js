@@ -123,14 +123,14 @@ function start_game() {
 
         var rotate_threshold = self.max_speed * 0.5;
         rotate_threshold *= rotate_threshold;
-        self.rotate_to_dest = function () {
+        self.rotate_to_dest = function (sprite) {
             if (self.target !== null) {
                 self.angle_dest = xy_to_angle(self.target.x - self.x, self.target.y - self.y);
             }
             else if (self.body.velocity.getMagnitudeSq() > rotate_threshold){
                 self.angle_dest = xy_to_angle(self.body.velocity.x, self.body.velocity.y);
             }
-            self.angle = angular_lerp(self.angle, deg(self.angle_dest), self.angular_lerp, false);
+            sprite.angle = angular_lerp(sprite.angle, deg(self.angle_dest), self.angular_lerp, false);
         }
 
         self.custom_update = function () {
@@ -267,7 +267,7 @@ function start_game() {
         self.crosshair_scale_off = 2.0;
 
         self.crosshair = player_ui_group.create(0, 0, 'crosshair');
-        self.crosshair.tint = 0xff4400;
+        // self.crosshair.tint = 0xff4400;
         self.crosshair.anchor.setTo(0.5);
         self.crosshair.alpha = 0.0;
         self.crosshair.scale.setTo(self.crosshair_scale_off);
@@ -431,7 +431,8 @@ function start_game() {
         self.move_towards = function (x, y) {
             if (!self.arrived_at(x, y)) {
                 self.move(x - self.x, y - self.y);
-                if (x > self.x) {
+                var flip = self.target ? self.target.x > self.x : x > self.x
+                if (flip) {
                     self.scale.x = -2.0;
                     self.arm_sprite.x = self.x - 5.0;
                     self.arm_sprite.y = self.y - 5.0;
@@ -488,12 +489,19 @@ function start_game() {
             }
         }
 
+        self.on_death = function () {
+            self.arm_sprite.destroy();
+        }
+
         self.custom_update = function () {
             // self.move(x, y);
 
             // self.weapon.launch(self.x, self.y, self.target);
             self.check_target();
-            self.rotate_to_dest()
+            self.rotate_to_dest(self.arm_sprite)
+            if (self.arm_sprite.tint != self.tint) {
+                self.arm_sprite.tint = self.tint
+            }
 
             if (self.state == 'idle') {
                 if (self.target !== null) {
