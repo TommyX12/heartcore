@@ -316,9 +316,9 @@ function start_game() {
             }
 
             if (x != 0 || y != 0) {
-                agent_group.callAll('animations.play', 'animations', 'run');
+                self.animations.play('run')
             } else {
-                agent_group.callAll('animations.play', 'animations', 'idle');
+                self.animations.play('idle')
             }
 
             if (input_manager.is_mouse_holding()) {
@@ -399,11 +399,11 @@ function start_game() {
     function Enemy() {
         var self = Agent('imp_left', 'enemy');
 
-        agent_group.callAll('animations.add', 'animations', 'run', [0, 1, 2, 3, 4, 5], 10, true);
-        agent_group.callAll('animations.add', 'animations', 'idle', [6], 10, true);
+        self.animations.add('run', [0, 1, 2, 3, 4, 5], 10, true)
+        self.animations.add('idle', [6], 10, true)
 
         //  And play them
-        agent_group.callAll('animations.play', 'animations', 'run');
+        self.animations.play('run')
 
         self.tint = 0xff4422;
         var pos = get_random_floor_pos(map_data, world_width, world_height, world_tile_width, world_tile_height);
