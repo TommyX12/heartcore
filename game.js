@@ -318,9 +318,9 @@ function start_game() {
             }
 
             if (x != 0 || y != 0) {
-                agent_group.callAll('animations.play', 'animations', 'run');
+                self.animations.play('run')
             } else {
-                agent_group.callAll('animations.play', 'animations', 'idle');
+                self.animations.play('idle')
             }
 
             if (input_manager.is_mouse_holding()) {
@@ -399,7 +399,13 @@ function start_game() {
     }
 
     function Enemy() {
-        var self = Agent('imp', 'enemy');
+        var self = Agent('imp_left', 'enemy');
+
+        self.animations.add('run', [0, 1, 2, 3, 4, 5], 10, true)
+        self.animations.add('idle', [6], 10, true)
+
+        //  And play them
+        self.animations.play('run')
 
         self.tint = 0xff4422;
         var pos = get_random_floor_pos(map_data, world_width, world_height, world_tile_width, world_tile_height);
@@ -1324,6 +1330,7 @@ function start_game() {
         game.load.image('trail2', 'images/trail2.png');
 
         game.load.spritesheet('player_left', 'images/player_left_run.png', 32, 48);
+        game.load.spritesheet('imp_left', 'images/imp_left_run.png', 32, 32);
 
         game.load.bitmapFont('gem', 'fonts/gem.png', 'fonts/gem.xml');
     }
