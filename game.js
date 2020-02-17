@@ -255,6 +255,8 @@ function start_game() {
         self.scale.x = 2.0;
         self.scale.y = 2.0;
 
+        self.take_host_damage = true
+
         agent_group.callAll('animations.add', 'animations', 'run', [0, 1, 2, 3, 4, 5], 10, true);
         agent_group.callAll('animations.add', 'animations', 'idle', [6], 10, true);
 
@@ -902,6 +904,10 @@ function start_game() {
                     }
                     self.on_launch(x, y, target);
                     self.charge -= self.total_charge;
+                    if (self.host.take_host_damage && self.get_host_damage) {
+                        self.host.hp -= self.get_host_damage();
+                        self.host.check_health()
+                    }
                 }
             }
         }
@@ -928,6 +934,11 @@ function start_game() {
         self.bullet_size = 0.6;
         self.bullet_damage = 10;
         self.pellets = 1;
+        self.host_damage_ratio = 0.2
+
+        self.get_host_damage = function () {
+            return self.bullet_damage * self.host_damage_ratio * self.pellets;
+        }
 
         var temp_point = new Phaser.Point(0, 0);
         self.on_launch = function (x, y, target) {
@@ -969,6 +980,11 @@ function start_game() {
         // self.allow_blind_fire = false;
         self.allow_blind_fire = true;
         self.pellets = 1;
+        self.host_damage_ratio = 0.2
+
+        self.get_host_damage = function () {
+            return self.missile_damage * self.host_damage_ratio * self.pellets;
+        }
 
         var temp_point = new Phaser.Point(0, 0);
         self.on_launch = function (x, y, target) {
